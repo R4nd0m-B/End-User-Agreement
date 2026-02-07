@@ -16,13 +16,22 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-60 bg-white border-r border-gray-200 min-h-screen flex flex-col">
-      <div className="px-5 py-5 border-b border-gray-100">
-        <Link href="/admin" className="text-lg font-semibold text-gray-900">
-          Admin Panel
+    <aside className="w-64 bg-gray-900 min-h-screen flex flex-col">
+      <div className="px-5 py-5 border-b border-gray-800">
+        <Link href="/admin" className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <svg className="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white">HULA Admin</p>
+            <p className="text-xs text-gray-400">Management Console</p>
+          </div>
         </Link>
       </div>
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
+      <nav className="flex-1 px-3 py-4 space-y-1">
+        <p className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Menu</p>
         {navItems.map((item) => {
           const isActive = pathname === item.href ||
             (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -30,10 +39,10 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-blue-600 text-white font-medium shadow-sm'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`}
             >
               <svg className="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,6 +53,9 @@ export default function AdminSidebar() {
           );
         })}
       </nav>
+      <div className="px-4 py-4 border-t border-gray-800">
+        <p className="text-xs text-gray-500">Ethical Use Agreement Platform</p>
+      </div>
     </aside>
   );
 }

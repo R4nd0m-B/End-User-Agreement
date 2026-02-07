@@ -19,14 +19,15 @@ export function verifyPassword(plain: string, hash: string): boolean {
 
 // --- Admin Session Management ---
 
-export function createSession(): string {
+export function createSession(ipAddress: string): string {
   const db = getDb();
   const id = crypto.randomUUID();
   const now = new Date();
   const expires = new Date(now.getTime() + SESSION_DURATION_HOURS * 60 * 60 * 1000);
 
-  db.prepare('INSERT INTO sessions (id, created_at, expires_at) VALUES (?, ?, ?)').run(
+  db.prepare('INSERT INTO sessions (id, ip_address, created_at, expires_at) VALUES (?, ?, ?, ?)').run(
     id,
+    ipAddress,
     now.toISOString(),
     expires.toISOString()
   );

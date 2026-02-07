@@ -6,7 +6,7 @@ import { updateAgreement } from '@/lib/actions/agreement';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Alert from '@/components/ui/Alert';
-import ReactMDEEditor from '@/components/admin/TiptapEditor';
+import MarkdownEditor from '@/components/admin/TiptapEditor';
 import type { Agreement } from '@/lib/types';
 
 interface AgreementEditorProps {
@@ -58,7 +58,7 @@ export default function AgreementEditor({ agreement }: AgreementEditorProps) {
           Agreement Content
         </label>
 
-        <ReactMDEEditor
+        <MarkdownEditor
           content={agreement.content}
           onChange={setContent}
         />

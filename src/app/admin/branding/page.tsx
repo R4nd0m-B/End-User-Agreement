@@ -7,12 +7,11 @@ export default async function AdminBrandingPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">Branding & Appearance</h1>
       <Card
         header={
           <div>
-            <h2 className="text-base font-medium text-gray-900">Front Page Customization</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h2 className="text-sm font-semibold text-gray-900">Front Page Customization</h2>
+            <p className="text-xs text-gray-500 mt-0.5">
               Customize how the public-facing pages appear to participants.
             </p>
           </div>

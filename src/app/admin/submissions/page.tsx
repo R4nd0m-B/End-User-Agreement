@@ -16,7 +16,6 @@ export default async function AdminSubmissionsPage({ searchParams }: Submissions
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Submissions</h1>
       <Card>
         <SubmissionTable
           submissions={submissions}

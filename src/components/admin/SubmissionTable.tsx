@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { format } from 'date-fns';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import type { Submission } from '@/lib/types';
@@ -62,35 +63,38 @@ export default function SubmissionTable({ submissions, total, page, pageSize, se
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-6">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 text-left">
-              <th className="pb-3 font-medium text-gray-500">User ID</th>
-              <th className="pb-3 font-medium text-gray-500">Name</th>
-              <th className="pb-3 font-medium text-gray-500">Email</th>
-              <th className="pb-3 font-medium text-gray-500">Phone</th>
-              <th className="pb-3 font-medium text-gray-500">Date</th>
-              <th className="pb-3 font-medium text-gray-500">Actions</th>
+            <tr className="border-b border-gray-200 text-left bg-gray-50">
+              <th className="px-6 py-3 font-medium text-xs text-gray-500 uppercase tracking-wider">User ID</th>
+              <th className="px-4 py-3 font-medium text-xs text-gray-500 uppercase tracking-wider">Name</th>
+              <th className="px-4 py-3 font-medium text-xs text-gray-500 uppercase tracking-wider">Email</th>
+              <th className="px-4 py-3 font-medium text-xs text-gray-500 uppercase tracking-wider">Phone</th>
+              <th className="px-4 py-3 font-medium text-xs text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-4 py-3 font-medium text-xs text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {submissions.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
+                  <svg className="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                   No submissions found.
                 </td>
               </tr>
             ) : (
               submissions.map((sub) => (
-                <tr key={sub.id} className="hover:bg-gray-50">
-                  <td className="py-3 font-mono text-xs text-gray-600">{sub.id.slice(0, 8)}...</td>
-                  <td className="py-3 text-gray-900">{sub.full_name}</td>
-                  <td className="py-3 text-gray-600">{sub.email}</td>
-                  <td className="py-3 text-gray-600">{sub.phone}</td>
-                  <td className="py-3 text-gray-500 text-xs">{new Date(sub.created_at).toLocaleString()}</td>
-                  <td className="py-3">
-                    <div className="flex items-center gap-2">
+                <tr key={sub.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-3.5 font-mono text-xs text-gray-500">{sub.id.slice(0, 8)}...</td>
+                  <td className="px-4 py-3.5 text-gray-900 font-medium">{sub.full_name}</td>
+                  <td className="px-4 py-3.5 text-gray-600">{sub.email}</td>
+                  <td className="px-4 py-3.5 text-gray-600">{sub.phone}</td>
+                  <td className="px-4 py-3.5 text-gray-500 text-xs">{format(new Date(sub.created_at), 'MMM d, yyyy h:mm a')}</td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-1">
                       <Link href={`/admin/submissions/${sub.id}`}>
                         <Button variant="ghost" size="sm">View</Button>
                       </Link>
