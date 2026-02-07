@@ -7,6 +7,8 @@ const inter = Inter({
   display: "swap",
 });
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "Ethical Use Agreement",
   description: "Training Consent & Ethical Use Agreement Platform",
