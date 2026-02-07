@@ -1,26 +1,547 @@
 @import "tailwindcss";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+/* React-MDE Editor Styling */
+.markdown-editor-wrapper .mde-container {
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  background: white !important;
+}
+
+.markdown-editor-wrapper .mde-header {
+  background: #f9fafb !important;
+  border-bottom: 1px solid #d1d5db !important;
+  padding: 8px !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 2px !important;
+  overflow-x: auto !important;
+  align-items: center !important;
+  min-height: 44px !important;
+}
+
+.markdown-editor-wrapper .mde-header::-webkit-scrollbar {
+  height: 4px;
+}
+
+.markdown-editor-wrapper .mde-header::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.markdown-editor-wrapper .mde-header::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.markdown-editor-wrapper .mde-header button {
+  border: none !important;
+  background: transparent !important;
+  color: #4b5563 !important;
+  cursor: pointer !important;
+  padding: 6px 8px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.markdown-editor-wrapper .mde-header button:hover {
+  background-color: #e5e7eb !important;
+  color: #1f2937 !important;
+}
+
+.markdown-editor-wrapper .mde-header button:active,
+.markdown-editor-wrapper .mde-header button.active {
+  background-color: #dbeafe !important;
+  color: #0f172a !important;
+}
+
+.markdown-editor-wrapper .mde-tabs {
+  display: flex !important;
+  border-bottom: 1px solid #d1d5db !important;
+  background: white !important;
+}
+
+.markdown-editor-wrapper .mde-tabs button {
+  flex: 1 !important;
+  padding: 12px 16px !important;
+  background: transparent !important;
+  border: none !important;
+  color: #6b7280 !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+  border-bottom: 2px solid transparent !important;
+  transition: all 0.2s ease !important;
+}
+
+.markdown-editor-wrapper .mde-tabs button.active {
+  color: #0f766e !important;
+  border-bottom-color: #3b82f6 !important;
+}
+
+.markdown-editor-wrapper .mde-input,
+.markdown-editor-wrapper .mde-textarea {
+  background: white !important;
+  color: #374151 !important;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Courier New", monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  padding: 12px !important;
+  border: none !important;
+}
+
+.markdown-editor-wrapper .mde-input:focus,
+.markdown-editor-wrapper .mde-textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.markdown-editor-wrapper .mde-preview {
+  background: white !important;
+  padding: 16px !important;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  color: #374151 !important;
+}
+
+.markdown-editor-wrapper .mde-preview-content {
+  color: #374151 !important;
+}
+
+/* Markdown content styling in editor preview */
+.markdown-editor-wrapper .mde-preview h1,
+.markdown-editor-wrapper .mde-preview h2,
+.markdown-editor-wrapper .mde-preview h3,
+.markdown-editor-wrapper .mde-preview h4,
+.markdown-editor-wrapper .mde-preview h5,
+.markdown-editor-wrapper .mde-preview h6 {
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+  margin-top: 1em !important;
+  margin-bottom: 0.5em !important;
+  line-height: 1.3 !important;
+}
+
+.markdown-editor-wrapper .mde-preview h1 { font-size: 1.875em !important; }
+.markdown-editor-wrapper .mde-preview h2 { font-size: 1.5em !important; }
+.markdown-editor-wrapper .mde-preview h3 { font-size: 1.25em !important; }
+
+.markdown-editor-wrapper .mde-preview p {
+  margin-bottom: 1em !important;
+  line-height: 1.6 !important;
+}
+
+.markdown-editor-wrapper .mde-preview ul,
+.markdown-editor-wrapper .mde-preview ol {
+  margin-left: 2em !important;
+  margin-bottom: 1em !important;
+}
+
+.markdown-editor-wrapper .mde-preview li {
+  margin-bottom: 0.5em !important;
+}
+
+.markdown-editor-wrapper .mde-preview code {
+  background-color: #f3f4f6 !important;
+  color: #dc2626 !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Courier New", monospace !important;
+  font-size: 0.875em !important;
+}
+
+.markdown-editor-wrapper .mde-preview pre {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  padding: 12px !important;
+  border-radius: 6px !important;
+  overflow-x: auto !important;
+  margin: 1em 0 !important;
+}
+
+.markdown-editor-wrapper .mde-preview pre code {
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+}
+
+.markdown-editor-wrapper .mde-preview blockquote {
+  border-left: 4px solid #3b82f6 !important;
+  padding-left: 1em !important;
+  margin-left: 0 !important;
+  color: #6b7280 !important;
+  font-style: italic !important;
+  background: #f0f9ff !important;
+  padding: 0.75em 1em !important;
+}
+
+.markdown-editor-wrapper .mde-preview table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin: 1em 0 !important;
+}
+
+.markdown-editor-wrapper .mde-preview table th,
+.markdown-editor-wrapper .mde-preview table td {
+  border: 1px solid #d1d5db !important;
+  padding: 0.75em !important;
+  text-align: left !important;
+}
+
+.markdown-editor-wrapper .mde-preview table th {
+  background-color: #f3f4f6 !important;
+  font-weight: 600 !important;
+}
+
+.markdown-editor-wrapper .mde-preview a {
+  color: #0f766e !important;
+  text-decoration: underline !important;
+}
+
+.markdown-editor-wrapper .mde-preview a:hover {
+  color: #134e4a !important;
+}
+
+.markdown-editor-wrapper .mde-preview strong {
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+}
+
+.markdown-editor-wrapper .mde-preview em {
+  font-style: italic !important;
+}
+
+.markdown-editor-wrapper .mde-preview img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 6px !important;
+  margin: 1em 0 !important;
+}
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1a2e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.agreement-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.agreement-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+.agreement-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.agreement-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Tiptap Editor Styling */
+.tiptap {
+  outline: none;
+}
+
+.tiptap h1,
+.tiptap h2,
+.tiptap h3,
+.tiptap h4,
+.tiptap h5,
+.tiptap h6 {
+  color: #1f2937;
+  font-weight: 600;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.tiptap h1 {
+  font-size: 2em;
+}
+
+.tiptap h2 {
+  font-size: 1.5em;
+}
+
+.tiptap h3 {
+  font-size: 1.25em;
+}
+
+.tiptap h4 {
+  font-size: 1.1em;
+}
+
+.tiptap h5,
+.tiptap h6 {
+  font-size: 1em;
+}
+
+.tiptap p {
+  margin-bottom: 0.5em;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.tiptap li {
+  margin-bottom: 0.25em;
+}
+
+.tiptap blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1em;
+  margin-left: 0;
+  color: #6b7280;
+  font-style: italic;
+  background: #f0f9ff;
+  padding: 0.75em 1em;
+}
+
+.tiptap code {
+  background-color: #f3f4f6;
+  color: #dc2626;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Courier New", monospace;
+  font-size: 0.9em;
+}
+
+.tiptap pre {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  margin: 0.5em 0;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Courier New", monospace;
+}
+
+.tiptap pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: 0.875em;
+}
+
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.tiptap table th,
+.tiptap table td {
+  border: 1px solid #d1d5db;
+  padding: 0.75em;
+  text-align: left;
+}
+
+.tiptap table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.tiptap table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.tiptap a {
+  color: #0f766e;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tiptap a:hover {
+  color: #134e4a;
+}
+
+.tiptap em {
+  font-style: italic;
+}
+
+.tiptap strong {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 1em 0;
+}
+
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5em;
+  margin: 1em 0;
+}
+
+/* Markdown Prose Styling (for display) */
+.prose-agreement {
+  line-height: 1.6;
+  color: #374151;
+}
+
+.prose-agreement h1,
+.prose-agreement h2,
+.prose-agreement h3,
+.prose-agreement h4,
+.prose-agreement h5,
+.prose-agreement h6 {
+  color: #1f2937;
+  font-weight: 600;
+  margin-top: 1.25em;
+  margin-bottom: 0.75em;
+}
+
+.prose-agreement h1 {
+  font-size: 1.875em;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.3em;
+}
+
+.prose-agreement h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.3em;
+}
+
+.prose-agreement h3 {
+  font-size: 1.25em;
+}
+
+.prose-agreement h4 {
+  font-size: 1.1em;
+}
+
+.prose-agreement p {
+  margin-bottom: 1em;
+}
+
+.prose-agreement ul,
+.prose-agreement ol {
+  margin-bottom: 1em;
+  padding-left: 2.5em;
+}
+
+.prose-agreement li {
+  margin-bottom: 0.5em;
+}
+
+.prose-agreement blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  color: #6b7280;
+  font-style: italic;
+  background: #eff6ff;
+  padding: 0.75em 1em;
+}
+
+.prose-agreement code {
+  background-color: #f3f4f6;
+  color: #dc2626;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Courier New", monospace;
+  font-size: 0.9em;
+}
+
+.prose-agreement pre {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose-agreement pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: 0.875em;
+  line-height: 1.5;
+}
+
+.prose-agreement table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose-agreement table th,
+.prose-agreement table td {
+  border: 1px solid #d1d5db;
+  padding: 0.75em 1em;
+  text-align: left;
+}
+
+.prose-agreement table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.prose-agreement table tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.prose-agreement a {
+  color: #0f766e;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.prose-agreement a:hover {
+  color: #134e4a;
+}
+
+.prose-agreement em {
+  font-style: italic;
+}
+
+.prose-agreement strong {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.prose-agreement hr {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 1.5em 0;
 }

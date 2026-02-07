@@ -1,0 +1,686 @@
+===============================================================================
+EASYMDE MARKDOWN EDITOR - SETUP GUIDE FOR NEW APPLICATIONS
+===============================================================================
+
+This guide contains all the code you need to integrate EasyMDE markdown editor
+into your new application. Copy and adapt as needed.
+
+===============================================================================
+1. CDN LINKS (Add to <head> section)
+===============================================================================
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- EasyMDE CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+
+<!-- Markdown parsing and sanitization libraries -->
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
+
+===============================================================================
+2. HTML STRUCTURE
+===============================================================================
+
+<div class="form-group">
+    <label class="form-label" for="editor_content">
+        Content * 
+        <span class="text-muted" style="font-weight: normal; font-size: 12px;">
+            (Markdown supported - add images, code, formatting)
+        </span>
+    </label>
+    <textarea 
+        class="form-control" 
+        id="editor_content" 
+        rows="3" 
+        placeholder="Enter your content here. Use **bold**, *italic*, `code`, ![image](url)">
+    </textarea>
+</div>
+
+
+===============================================================================
+3. CSS STYLING
+===============================================================================
+
+<style>
+    /* Clean Editor Styles */
+    .EasyMDEContainer {
+        border: 1px solid #d6d3d1;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    
+    .editor-toolbar {
+        background: #fff;
+        border: none;
+        border-bottom: 1px solid #e7e5e4;
+        padding: 8px;
+        opacity: 1;
+    }
+    
+    .editor-toolbar::before,
+    .editor-toolbar::after {
+        display: none;
+    }
+    
+    .editor-toolbar button {
+        color: #57534e !important;
+        border: none !important;
+        border-radius: 4px;
+        width: 28px;
+        height: 28px;
+        margin: 0 1px;
+    }
+    
+    .editor-toolbar button:hover {
+        background: #f5f5f4 !important;
+        border: none !important;
+    }
+    
+    .editor-toolbar button.active {
+        background: #eff6ff !important;
+        color: #2563eb !important;
+    }
+    
+    .editor-toolbar i.separator {
+        border-left: 1px solid #e7e5e4;
+        border-right: none;
+        margin: 0 6px;
+    }
+    
+    .EasyMDEContainer .CodeMirror {
+        border: none;
+        border-radius: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        padding: 8px 12px;
+        height: 160px;
+        background: #fff;
+    }
+    
+    .EasyMDEContainer .CodeMirror-focused {
+        outline: none;
+    }
+    
+    .EasyMDEContainer .CodeMirror-scroll {
+        min-height: 120px;
+    }
+    
+    .editor-statusbar {
+        background: #fafaf9;
+        border-top: 1px solid #e7e5e4;
+        padding: 4px 12px;
+        font-size: 11px;
+        color: #a8a29e;
+    }
+    
+    .editor-preview,
+    .editor-preview-side {
+        background: #fff;
+        padding: 12px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    
+    .editor-preview-side {
+        border-left: 1px solid #e7e5e4;
+    }
+
+    /* Markdown rendering styles */
+    .markdown-body { 
+        line-height: 1.6; 
+    }
+    
+    .markdown-body img { 
+        max-width: 100%; 
+        height: auto; 
+        border-radius: 4px; 
+        margin: 8px 0; 
+    }
+    
+    .markdown-body code { 
+        background: #f5f5f4; 
+        padding: 2px 5px; 
+        border-radius: 3px; 
+        font-size: 0.875em; 
+        color: #44403c; 
+    }
+    
+    .markdown-body pre { 
+        background: #292524; 
+        color: #e7e5e4; 
+        padding: 12px; 
+        border-radius: 6px; 
+        overflow-x: auto; 
+        margin: 8px 0; 
+    }
+    
+    .markdown-body pre code { 
+        background: none; 
+        padding: 0; 
+        color: inherit; 
+    }
+    
+    .markdown-body blockquote { 
+        border-left: 3px solid #d6d3d1; 
+        margin: 8px 0; 
+        padding: 8px 12px; 
+        color: #57534e; 
+    }
+</style>
+
+
+===============================================================================
+4. JAVASCRIPT CODE
+===============================================================================
+
+<script>
+    let easyMDE = null;
+
+    /**
+     * Escape HTML characters for safe display of plain text
+     */
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    /**
+     * Render markdown to HTML safely
+     * Uses marked.js for parsing and DOMPurify for sanitization
+     */
+    function renderMarkdown(text) {
+        if (!text) return '';
+        const rawHtml = marked.parse(text);
+        return DOMPurify.sanitize(rawHtml);
+    }
+
+    /**
+     * Upload image to server
+     * Expects an API endpoint at /api/upload-image that accepts base64 image
+     */
+    async function uploadImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const response = await fetch('/api/upload-image', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: e.target.result })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        resolve(data.url);
+                    } else {
+                        reject(new Error(data.message));
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    /**
+     * Initialize the EasyMDE editor
+     * Call this function when you want to create or recreate the editor
+     */
+    function initEditor(elementId = 'editor_content') {
+        // Destroy existing editor if any
+        if (easyMDE) {
+            easyMDE.toTextArea();
+            easyMDE = null;
+        }
+
+        easyMDE = new EasyMDE({
+            element: document.getElementById(elementId),
+            spellChecker: false,
+            status: ['lines', 'words'],
+            placeholder: 'Write your content here... (supports markdown)',
+            minHeight: '160px',
+            toolbar: [
+                'bold', 'italic', 'heading', '|',
+                'code', 'quote', '|',
+                'unordered-list', 'ordered-list', '|',
+                'link',
+                {
+                    name: 'upload-image',
+                    action: function(editor) {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.onchange = async function() {
+                            if (input.files && input.files[0]) {
+                                try {
+                                    const url = await uploadImage(input.files[0]);
+                                    const cm = editor.codemirror;
+                                    const pos = cm.getCursor();
+                                    cm.replaceRange(`![image](${url})`, pos);
+                                } catch (error) {
+                                    alert('Failed to upload image: ' + error.message);
+                                }
+                            }
+                        };
+                        input.click();
+                    },
+                    className: 'fa fa-image',
+                    title: 'Upload Image'
+                },
+                'table', '|',
+                'preview', 'fullscreen'
+            ],
+            previewRender: function(plainText) {
+                return DOMPurify.sanitize(marked.parse(plainText));
+            },
+            uploadImage: true,
+            imageUploadFunction: async function(file, onSuccess, onError) {
+                try {
+                    const url = await uploadImage(file);
+                    onSuccess(url);
+                } catch (error) {
+                    onError(error.message);
+                }
+            }
+        });
+
+        // Add paste handler for images
+        easyMDE.codemirror.on('paste', async function(cm, e) {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    e.preventDefault();
+                    const file = items[i].getAsFile();
+                    try {
+                        const url = await uploadImage(file);
+                        const pos = cm.getCursor();
+                        cm.replaceRange(`![image](${url})`, pos);
+                    } catch (error) {
+                        alert('Failed to upload image: ' + error.message);
+                    }
+                    break;
+                }
+            }
+        });
+
+        // Add drag & drop handler for images
+        easyMDE.codemirror.on('drop', async function(cm, e) {
+            const files = e.dataTransfer?.files;
+            if (!files || files.length === 0) return;
+
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type.indexOf('image') !== -1) {
+                    e.preventDefault();
+                    try {
+                        const url = await uploadImage(files[i]);
+                        const pos = cm.coordsChar({ left: e.pageX, top: e.pageY });
+                        cm.replaceRange(`![image](${url})\n`, pos);
+                    } catch (error) {
+                        alert('Failed to upload image: ' + error.message);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Get the current markdown content from the editor
+     */
+    function getEditorContent() {
+        return easyMDE ? easyMDE.value() : '';
+    }
+
+    /**
+     * Set the markdown content in the editor
+     */
+    function setEditorContent(content) {
+        if (easyMDE) {
+            easyMDE.value(content);
+        }
+    }
+
+    /**
+     * Destroy the editor (clean up)
+     */
+    function destroyEditor() {
+        if (easyMDE) {
+            easyMDE.toTextArea();
+            easyMDE = null;
+        }
+    }
+
+    // Initialize editor when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        initEditor('editor_content');
+    });
+</script>
+
+
+===============================================================================
+5. USAGE EXAMPLES
+===============================================================================
+
+EXAMPLE 1: Basic Form Submission
+---------------------------------
+document.getElementById('myForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const content = getEditorContent();
+    
+    if (!content.trim()) {
+        alert('Content is required');
+        return;
+    }
+    
+    // Submit your content
+    fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: content })
+    });
+});
+
+
+EXAMPLE 2: Display Rendered Markdown
+-------------------------------------
+<div id="preview" class="markdown-body"></div>
+
+<script>
+    // Render markdown from server response
+    const markdownText = "# Hello\n\nThis is **bold** text.";
+    document.getElementById('preview').innerHTML = renderMarkdown(markdownText);
+</script>
+
+
+EXAMPLE 3: Edit Mode (with form modal)
+---------------------------------------
+function editContent(contentId, initialMarkdown) {
+    // Show modal
+    document.getElementById('content-modal').classList.add('active');
+    
+    // Initialize editor
+    setTimeout(() => {
+        initEditor('editor_content');
+        setEditorContent(initialMarkdown);
+    }, 100);
+}
+
+
+EXAMPLE 4: Complete Question Rendering (MCQ Platform)
+------------------------------------------------------
+// HTML Structure
+<div id="questions-container"></div>
+
+// JavaScript to render questions with markdown
+function renderQuestions(questions) {
+    const container = document.getElementById('questions-container');
+    
+    container.innerHTML = questions.map((question, index) => `
+        <div class="card" style="margin-bottom: 1rem;">
+            <div style="margin-bottom: 1rem;">
+                <span class="badge">#${index + 1}</span>
+                <span class="badge">${question.marks} points</span>
+            </div>
+            
+            <!-- Render markdown question text -->
+            <div class="markdown-body" style="margin-bottom: 1rem;">
+                ${renderMarkdown(question.question_text)}
+            </div>
+            
+            <!-- Display options -->
+            <div style="display: grid; gap: 6px;">
+                <div style="padding: 8px 10px; background: #f5f5f4; border-radius: 4px;">
+                    <strong>A.</strong> ${escapeHtml(question.option_a)}
+                </div>
+                <div style="padding: 8px 10px; background: #f5f5f4; border-radius: 4px;">
+                    <strong>B.</strong> ${escapeHtml(question.option_b)}
+                </div>
+                <div style="padding: 8px 10px; background: #f5f5f4; border-radius: 4px;">
+                    <strong>C.</strong> ${escapeHtml(question.option_c)}
+                </div>
+                <div style="padding: 8px 10px; background: #f5f5f4; border-radius: 4px;">
+                    <strong>D.</strong> ${escapeHtml(question.option_d)}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Load and render questions from API
+async function loadQuestions() {
+    const response = await fetch('/api/questions');
+    const questions = await response.json();
+    renderQuestions(questions);
+}
+
+
+===============================================================================
+6. BACKEND API REQUIREMENT
+===============================================================================
+
+Your backend needs an endpoint at /api/upload-image that:
+- Accepts POST requests with JSON body containing: { image: "<base64-data>" }
+- Saves the image file
+- Returns JSON response: { success: true, url: "<image-url>" }
+
+Example Node.js/Express implementation:
+
+const fs = require('fs');
+const path = require('path');
+
+app.post('/api/upload-image', (req, res) => {
+    try {
+        const base64Image = req.body.image.split(';base64,').pop();
+        const filename = `image_${Date.now()}.png`;
+        const filepath = path.join(__dirname, 'uploads', filename);
+        
+        fs.writeFileSync(filepath, base64Image, 'base64');
+        
+        res.json({
+            success: true,
+            url: `/uploads/${filename}`
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: 'Upload failed: ' + error.message
+        });
+    }
+});
+
+
+===============================================================================
+7. FEATURES INCLUDED
+===============================================================================
+
+✓ Bold, Italic, Headings (H1-H3)
+✓ Code and Code Blocks
+✓ Quotes and Lists (ordered/unordered)
+✓ Tables
+✓ Links
+✓ Image upload with drag & drop support
+✓ Paste image support
+✓ Live Preview mode
+✓ Fullscreen editing
+✓ Spell checker (disabled by default)
+✓ Word and line count
+✓ XSS protection with DOMPurify
+✓ Safe HTML rendering with marked.js
+
+
+===============================================================================
+8. CUSTOMIZATION
+===============================================================================
+
+Change placeholder text:
+    placeholder: 'Your custom placeholder'
+
+Hide toolbar button:
+    Remove from toolbar array, e.g., remove 'fullscreen' or 'preview'
+
+Disable status bar:
+    status: false
+
+Change editor height:
+    minHeight: '300px'
+
+Custom CSS class:
+    Add your own CSS targeting .markdown-body for rendered output
+
+
+===============================================================================
+10. RENDERING MARKDOWN IN YOUR APPLICATION
+===============================================================================
+
+The renderMarkdown() function handles:
+- Converting markdown text to HTML using marked.js
+- Sanitizing HTML with DOMPurify to prevent XSS attacks
+- Supporting all markdown features (bold, italic, code, tables, etc.)
+
+RENDERING ON PAGE LOAD:
+-----------------------
+// If you have markdown content in your database or API
+document.addEventListener('DOMContentLoaded', async function() {
+    const response = await fetch('/api/get-content/123');
+    const data = await response.json();
+    
+    // Render the markdown to HTML
+    const htmlContent = renderMarkdown(data.markdown_text);
+    
+    // Display in a container with markdown-body class for styling
+    document.getElementById('content-display').innerHTML = htmlContent;
+});
+
+
+RENDERING WITH INLINE CONTENT:
+-------------------------------
+// Direct rendering of markdown string
+const markdownText = `
+# Welcome to My App
+
+This is **bold** text and this is *italic*.
+
+Here's a code block:
+\`\`\`javascript
+console.log('Hello World');
+\`\`\`
+
+- List item 1
+- List item 2
+- List item 3
+`;
+
+// Render and display
+document.getElementById('preview').innerHTML = renderMarkdown(markdownText);
+
+
+DURING FORM SUBMISSION:
+-----------------------
+// Store markdown and render preview before saving
+document.getElementById('saveBtn').addEventListener('click', async function() {
+    const markdownContent = getEditorContent();
+    const htmlPreview = renderMarkdown(markdownContent);
+    
+    // Show preview to user
+    document.getElementById('preview').innerHTML = htmlPreview;
+    
+    // Then save to server
+    await fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            markdown: markdownContent,
+            html_preview: htmlPreview
+        })
+    });
+});
+
+
+KEY FUNCTIONS FOR RENDERING:
+----------------------------
+
+1. renderMarkdown(text)
+   - Input: Plain markdown text
+   - Output: Safe HTML string
+   - Use when: Displaying stored markdown content
+   
+2. escapeHtml(text)
+   - Input: Plain text
+   - Output: HTML-escaped text (no formatting)
+   - Use when: Displaying plain text (like answer options)
+   
+3. getEditorContent()
+   - Input: None
+   - Output: Current markdown from editor
+   - Use when: Getting user input before saving
+
+
+===============================================================================
+11. COMPLETE EXAMPLE: SAVE AND DISPLAY CYCLE
+===============================================================================
+
+HTML:
+-----
+<div id="editor-section">
+    <textarea id="editor_content"></textarea>
+    <button onclick="saveContent()">Save</button>
+</div>
+
+<div id="display-section">
+    <h3>Preview:</h3>
+    <div id="preview" class="markdown-body"></div>
+</div>
+
+
+JavaScript:
+-----------
+async function saveContent() {
+    const markdown = getEditorContent();
+    
+    if (!markdown.trim()) {
+        alert('Please enter some content');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/content', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: markdown })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Content saved!');
+            // Show the rendered preview
+            displayContent(markdown);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+function displayContent(markdownText) {
+    // Convert markdown to HTML and display
+    const htmlContent = renderMarkdown(markdownText);
+    document.getElementById('preview').innerHTML = htmlContent;
+}
+
+- Image upload endpoint (/api/upload-image) must be implemented in backend
+- DOMPurify sanitizes some HTML tags for security
+- Large images should be optimized before upload
+- Cross-origin images may have CORS restrictions
+
+
+===============================================================================
+For more info: https://github.com/Ionaru/easy-markdown-editor
+===============================================================================
