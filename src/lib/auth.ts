@@ -103,7 +103,7 @@ export async function setSessionCookie(token: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.SECURE_COOKIES === 'true',
     sameSite: 'lax',
     path: '/',
     maxAge: SESSION_DURATION_HOURS * 60 * 60,
@@ -141,7 +141,7 @@ export async function setAccessCookie(): Promise<void> {
   const signature = signValue(timestamp);
   cookieStore.set(ACCESS_COOKIE, `${timestamp}.${signature}`, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.SECURE_COOKIES === 'true',
     sameSite: 'lax',
     path: '/',
     maxAge: ACCESS_DURATION_HOURS * 60 * 60,
