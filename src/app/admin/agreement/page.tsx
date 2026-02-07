@@ -1,9 +1,17 @@
+import { redirect } from 'next/navigation';
+import { isAdminAuthenticated } from '@/lib/auth';
 import { getActiveAgreement, getAgreementHistory } from '@/lib/actions/agreement';
 import Card from '@/components/ui/Card';
 import AgreementEditor from '@/components/admin/AgreementEditor';
 import VersionHistory from '@/components/admin/VersionHistory';
 
 export default async function AdminAgreementPage() {
+  // Enforce authentication
+  const isAuth = await isAdminAuthenticated();
+  if (!isAuth) {
+    redirect('/admin/login');
+  }
+
   const agreement = await getActiveAgreement();
   const history = await getAgreementHistory();
 

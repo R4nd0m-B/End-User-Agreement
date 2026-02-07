@@ -1,8 +1,16 @@
+import { redirect } from 'next/navigation';
+import { isAdminAuthenticated } from '@/lib/auth';
 import { getBranding } from '@/lib/actions/admin';
 import Card from '@/components/ui/Card';
 import BrandingEditor from '@/components/admin/BrandingEditor';
 
 export default async function AdminBrandingPage() {
+  // Enforce authentication
+  const isAuth = await isAdminAuthenticated();
+  if (!isAuth) {
+    redirect('/admin/login');
+  }
+
   const branding = await getBranding();
 
   return (

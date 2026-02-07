@@ -1,9 +1,17 @@
+import { redirect } from 'next/navigation';
+import { isAdminAuthenticated } from '@/lib/auth';
 import { getAccessKey } from '@/lib/actions/admin';
 import Card from '@/components/ui/Card';
 import AccessKeyManager from '@/components/admin/AccessKeyManager';
 import ChangePasswordForm from '@/components/admin/ChangePasswordForm';
 
 export default async function AdminSettingsPage() {
+  // Enforce authentication
+  const isAuth = await isAdminAuthenticated();
+  if (!isAuth) {
+    redirect('/admin/login');
+  }
+
   const accessKey = await getAccessKey();
 
   return (

@@ -9,6 +9,23 @@ const ACCESS_COOKIE = 'hula_access';
 const SESSION_DURATION_HOURS = 8;
 const ACCESS_DURATION_HOURS = 2;
 
+export function hashAccessKey(plain: string): string {
+  return plain; // Store plaintext for visibility
+}
+
+export function verifyAccessKey(plain: string, stored: string): boolean {
+  return plain === stored; // Simple string comparison
+}
+
+export function generateAccessKey(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let key = '';
+  for (let i = 0; i < 8; i++) {
+    key += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `${key.substring(0, 4)}-${key.substring(4, 8)}`;
+}
+
 export function hashPassword(plain: string): string {
   return hashSync(plain, 10);
 }
@@ -18,6 +35,29 @@ export function verifyPassword(plain: string, hash: string): boolean {
 }
 
 // --- Admin Session Management ---
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_ATTEMPT_WINDOW_MINUTES = 15;
+
+export function checkLoginAttempts(ipAddress: string): boolean {
+  const db = getDb();
+  const windowStart = new Date(Date.now() - LOGIN_ATTEMPT_WINDOW_MINUTES * 60 * 1000).toISOString();
+
+  const attempts = db.prepare(
+    "SELECT COUNT(*) as count FROM login_attempts WHERE ip_address = ? AND attempted_at > ?"
+  ).get(ipAddress, windowStart) as { count: number };
+
+  return attempts.count < MAX_LOGIN_ATTEMPTS;
+}
+
+export function recordLoginAttempt(ipAddress: string): void {
+  const db = getDb();
+  db.prepare('INSERT INTO login_attempts (ip_address) VALUES (?)').run(ipAddress);
+
+  // Clean up old attempts
+  const cutoffTime = new Date(Date.now() - 60 * 60 * 1000).toISOString(); // Keep 1 hour
+  db.prepare("DELETE FROM login_attempts WHERE attempted_at < ?").run(cutoffTime);
+}
 
 export function createSession(ipAddress: string): string {
   const db = getDb();
@@ -38,12 +78,20 @@ export function createSession(ipAddress: string): string {
   return id;
 }
 
-export function verifySession(token: string): boolean {
+export function verifySession(token: string, ipAddress?: string): boolean {
   const db = getDb();
   const session = db.prepare(
     "SELECT * FROM sessions WHERE id = ? AND expires_at > datetime('now')"
-  ).get(token) as Session | undefined;
-  return !!session;
+  ).get(token) as (Session & { ip_address: string }) | undefined;
+
+  if (!session) return false;
+
+  // Validate IP address if provided (prevents session hijacking from different IP)
+  if (ipAddress && session.ip_address !== ipAddress) {
+    return false;
+  }
+
+  return true;
 }
 
 export function deleteSession(token: string): void {
@@ -72,10 +120,10 @@ export async function clearSessionCookie(): Promise<void> {
   cookieStore.delete(SESSION_COOKIE);
 }
 
-export async function isAdminAuthenticated(): Promise<boolean> {
+export async function isAdminAuthenticated(ipAddress?: string): Promise<boolean> {
   const token = await getSessionCookie();
   if (!token) return false;
-  return verifySession(token);
+  return verifySession(token, ipAddress);
 }
 
 // --- Access Key Cookie ---

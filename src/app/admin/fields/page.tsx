@@ -1,8 +1,16 @@
+import { redirect } from 'next/navigation';
+import { isAdminAuthenticated } from '@/lib/auth';
 import { getCustomFields } from '@/lib/actions/fields';
 import Card from '@/components/ui/Card';
 import FieldConfigurator from '@/components/admin/FieldConfigurator';
 
 export default async function AdminFieldsPage() {
+  // Enforce authentication
+  const isAuth = await isAdminAuthenticated();
+  if (!isAuth) {
+    redirect('/admin/login');
+  }
+
   const fields = await getCustomFields();
 
   return (

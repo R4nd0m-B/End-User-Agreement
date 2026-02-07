@@ -28,7 +28,7 @@ export default function LoginForm() {
 
       const data = await res.json();
       if (data.success) {
-        router.push('/admin');
+        router.push('/security-console');
         router.refresh();
       } else {
         setError(data.error || 'Login failed');

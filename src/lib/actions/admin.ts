@@ -2,7 +2,7 @@
 
 import crypto from 'crypto';
 import { getDb } from '@/lib/db';
-import { isAdminAuthenticated, hashPassword, verifyPassword } from '@/lib/auth';
+import { isAdminAuthenticated, hashPassword, verifyPassword, hashAccessKey, generateAccessKey } from '@/lib/auth';
 import { accessKeyUpdateSchema, changePasswordSchema } from '@/lib/validators';
 import type { ActionResult, Setting, Branding } from '@/lib/types';
 
@@ -12,7 +12,38 @@ export async function getAccessKey(): Promise<string> {
   return setting?.value || '';
 }
 
-export async function setAccessKey(formData: FormData): Promise<ActionResult> {
+export async function getAdminPath(): Promise<string> {
+  return 'security-console';
+}
+
+export async function setAdminPath(formData: FormData): Promise<ActionResult<{ path: string }>> {
+  const isAuth = await isAdminAuthenticated();
+  if (!isAuth) return { success: false, error: 'Unauthorized' };
+
+  const path = (formData.get('path') as string)?.trim() || '';
+
+  // Validate path format
+  if (!path || path.length < 3) {
+    return { success: false, error: 'Admin path must be at least 3 characters' };
+  }
+  if (!/^[a-zA-Z0-9\-_]+$/.test(path)) {
+    return { success: false, error: 'Admin path can only contain letters, numbers, hyphens, and underscores' };
+  }
+  if (path === 'api' || path === 'form' || path === 'confirmation') {
+    return { success: false, error: 'Cannot use reserved paths' };
+  }
+
+  const db = getDb();
+  const oldPathSetting = db.prepare('SELECT value FROM settings WHERE key = ?').get('admin_path') as Setting | undefined;
+  const oldPath = oldPathSetting?.value || 'secure-console';
+
+  db.prepare('UPDATE settings SET value = ? WHERE key = ?').run(path, 'admin_path');
+  db.prepare('INSERT INTO audit_log (action, details) VALUES (?, ?)').run('admin_path_changed', JSON.stringify({ old_path: oldPath, new_path: path }));
+
+  return { success: true, data: { path } };
+}
+
+export async function setAccessKey(formData: FormData): Promise<ActionResult<{ key: string }>> {
   const isAuth = await isAdminAuthenticated();
   if (!isAuth) return { success: false, error: 'Unauthorized' };
 
@@ -23,17 +54,19 @@ export async function setAccessKey(formData: FormData): Promise<ActionResult> {
   const db = getDb();
   db.prepare('UPDATE settings SET value = ? WHERE key = ?').run(parsed.data.key, 'access_key');
   db.prepare('INSERT INTO audit_log (action, details) VALUES (?, ?)').run('access_key_updated', JSON.stringify({ method: 'manual' }));
-  return { success: true };
+
+  return { success: true, data: { key: parsed.data.key } };
 }
 
 export async function rotateAccessKey(): Promise<ActionResult<{ newKey: string }>> {
   const isAuth = await isAdminAuthenticated();
   if (!isAuth) return { success: false, error: 'Unauthorized' };
 
-  const newKey = `TRAIN-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+  const newKey = generateAccessKey();
   const db = getDb();
   db.prepare('UPDATE settings SET value = ? WHERE key = ?').run(newKey, 'access_key');
   db.prepare('INSERT INTO audit_log (action, details) VALUES (?, ?)').run('access_key_rotated', JSON.stringify({ method: 'auto' }));
+
   return { success: true, data: { newKey } };
 }
 

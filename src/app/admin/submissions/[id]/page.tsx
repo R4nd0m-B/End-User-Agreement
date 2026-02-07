@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { isAdminAuthenticated } from '@/lib/auth';
 import { getSubmission } from '@/lib/actions/submission';
 import { getAgreementByVersion } from '@/lib/actions/agreement';
 import Card from '@/components/ui/Card';
@@ -12,6 +13,12 @@ interface SubmissionDetailPageProps {
 }
 
 export default async function SubmissionDetailPage({ params }: SubmissionDetailPageProps) {
+  // Enforce authentication
+  const isAuth = await isAdminAuthenticated();
+  if (!isAuth) {
+    redirect('/admin/login');
+  }
+
   const { id } = await params;
   const submission = await getSubmission(id);
 

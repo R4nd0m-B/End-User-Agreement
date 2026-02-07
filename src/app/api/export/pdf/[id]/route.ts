@@ -11,7 +11,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const isAuth = await isAdminAuthenticated();
+  const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+  const isAuth = await isAdminAuthenticated(ipAddress);
   if (!isAuth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

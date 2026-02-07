@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+import { isAdminAuthenticated } from '@/lib/auth';
 import { getSubmissions } from '@/lib/actions/submission';
 import Card from '@/components/ui/Card';
 import SubmissionTable from '@/components/admin/SubmissionTable';
@@ -7,6 +9,12 @@ interface SubmissionsPageProps {
 }
 
 export default async function AdminSubmissionsPage({ searchParams }: SubmissionsPageProps) {
+  // Enforce authentication
+  const isAuth = await isAdminAuthenticated();
+  if (!isAuth) {
+    redirect('/admin/login');
+  }
+
   const params = await searchParams;
   const page = parseInt(params.page || '1', 10);
   const search = params.search || '';

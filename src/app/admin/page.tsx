@@ -1,7 +1,15 @@
+import { redirect } from 'next/navigation';
+import { isAdminAuthenticated } from '@/lib/auth';
 import { getDashboardStats, getAccessKey } from '@/lib/actions/admin';
 import Badge from '@/components/ui/Badge';
 
 export default async function AdminDashboard() {
+  // Enforce authentication - redirect to login if not authenticated
+  const isAuth = await isAdminAuthenticated();
+  if (!isAuth) {
+    redirect('/security-console/login');
+  }
+
   const stats = await getDashboardStats();
   const accessKey = await getAccessKey();
 
@@ -58,15 +66,27 @@ export default async function AdminDashboard() {
           <h2 className="text-sm font-semibold text-gray-900">Active Access Key</h2>
         </div>
         <div className="px-6 py-4">
-          <div className="flex items-center gap-3">
-            <code className="bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-lg text-sm font-mono text-gray-800 flex-1">
-              {accessKey}
-            </code>
-            <Badge variant="success">Active</Badge>
-          </div>
-          <p className="text-xs text-gray-400 mt-3">
-            Share this key with participants at the start of each session.
-          </p>
+          {accessKey ? (
+            <>
+              <div className="flex items-center gap-3">
+                <code className="bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-lg text-sm font-mono text-gray-800 flex-1">
+                  {accessKey}
+                </code>
+                <Badge variant="success">Active</Badge>
+              </div>
+              <p className="text-xs text-gray-400 mt-3">
+                Share this key with participants at the start of each session.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                <p className="text-sm text-amber-800">
+                  Current access key is hidden for security. Go to <a href="/admin/settings" className="underline font-medium">Settings</a> to view or generate a new key.
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

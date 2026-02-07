@@ -108,7 +108,10 @@ export function initializeSchema(db: Database.Database) {
     }
   }
 
-  seedSetting('access_key', process.env.DEFAULT_ACCESS_KEY || 'TRAINING-2024');
+  const defaultKey = process.env.DEFAULT_ACCESS_KEY || 'TRAINING-2024';
+  seedSetting('access_key', defaultKey);
+
+  seedSetting('admin_path', 'security-console');
 
   const adminHash = db.prepare('SELECT value FROM settings WHERE key = ?').get('admin_password_hash');
   if (!adminHash) {
@@ -137,11 +140,6 @@ export function initializeSchema(db: Database.Database) {
   // Seed default custom fields
   const fieldCount = db.prepare('SELECT COUNT(*) as count FROM custom_fields').get() as { count: number };
   if (fieldCount.count === 0) {
-    const insertField = db.prepare(
-      'INSERT INTO custom_fields (field_name, label, field_type, placeholder, is_required, sort_order) VALUES (?, ?, ?, ?, ?, ?)'
-    );
-    insertField.run('organization', 'Organization / Company', 'text', 'Enter your organization name', 0, 1);
-    insertField.run('role', 'Role / Designation', 'text', 'Enter your role', 0, 2);
-    insertField.run('batch_id', 'Batch / Session ID', 'text', 'Enter your batch or session ID', 0, 3);
+    // No default fields - admins can add them as needed via the admin panel
   }
 }
